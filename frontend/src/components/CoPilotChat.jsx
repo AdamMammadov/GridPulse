@@ -1,17 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Bot, Send, Loader2 } from "lucide-react";
 import { api } from "../api";
-
-const SUGGESTIONS = [
-  "D08 nə üçün bayraqlıdır?",
-  "M007 sayğacında niyə anomaliya var?",
-  "Zona B risk balı nədir?",
-  "Ümumi vəziyyət necədir?",
-];
+import { useLanguage } from "../i18n";
 
 export default function CoPilotChat() {
+  const { lang, t } = useLanguage();
   const [messages, setMessages] = useState([
-    { role: "bot", text: "Salam! GridPulse AI Co-Pilot-am. Cihaz, sayğac və ya zona haqqında sual verə bilərsiniz.", source: null },
+    { role: "bot", text: t("copilotWelcome"), source: null },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,6 +16,14 @@ export default function CoPilotChat() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  // İstifadəçi hələ yazışmayıbsa (yalnız salamlama mesajı varsa), dil
+  // dəyişdikdə salamlama mətnini də yeniləyir.
+  useEffect(() => {
+    setMessages((m) => (m.length === 1 && m[0].role === "bot" && !m[0].source
+      ? [{ role: "bot", text: t("copilotWelcome"), source: null }]
+      : m));
+  }, [lang]);
+
   async function send(question) {
     const q = (question ?? input).trim();
     if (!q || loading) return;
@@ -28,7 +31,7 @@ export default function CoPilotChat() {
     setInput("");
     setLoading(true);
     try {
-      const res = await api.copilotAsk(q);
+      const res = await api.copilotAsk(q, lang);
       setMessages((m) => [...m, { role: "bot", text: res.answer, source: res.source, note: res.note }]);
     } catch (e) {
       setMessages((m) => [...m, { role: "bot", text: `Xəta: ${e.message}`, source: "error" }]);
@@ -37,11 +40,13 @@ export default function CoPilotChat() {
     }
   }
 
+  const suggestions = t("copilotSuggestions");
+
   return (
     <div className="panel">
-      <p className="section-title"><Bot size={16} /> AI Co-Pilot</p>
+      <p className="section-title"><Bot size={16} /> {t("copilotTitle")}</p>
       <p style={{ fontSize: 11.5, color: "#6B7580", margin: "-6px 0 12px" }}>
-        Real hesablanmış diaqnoz datasına əsaslanan suallar — uydurma cavab vermir.
+        {t("copilotSubtitle")}
       </p>
 
       <div style={{
@@ -58,11 +63,11 @@ export default function CoPilotChat() {
             }}>
               {m.text}
               {m.source === "gemini" && (
-                <div style={{ fontSize: 9.5, color: "#3AA6B9", marginTop: 4 }}>✨ Gemini AI</div>
+                <div style={{ fontSize: 9.5, color: "#3AA6B9", marginTop: 4 }}>{t("copilotSourceGemini")}</div>
               )}
               {m.source === "rule_based_fallback" && (
                 <div style={{ fontSize: 9.5, color: "#F4C542", marginTop: 4 }}>
-                  ⚙ Ehtiyat cavab (API əlçatan olmadı)
+                  {t("copilotSourceFallback")}
                   {m.note && <div style={{ color: "#6B7580", marginTop: 2 }}>{m.note}</div>}
                 </div>
               )}
@@ -71,14 +76,14 @@ export default function CoPilotChat() {
         ))}
         {loading && (
           <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#6B7580", fontSize: 12 }}>
-            <Loader2 size={13} className="spin" /> Düşünür…
+            <Loader2 size={13} className="spin" /> {t("copilotThinking")}
           </div>
         )}
         <div ref={endRef} />
       </div>
 
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-        {SUGGESTIONS.map((s) => (
+        {suggestions.map((s) => (
           <button
             key={s}
             onClick={() => send(s)}
@@ -98,7 +103,7 @@ export default function CoPilotChat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
-          placeholder="Sual yazın… (məs. D01 nə vaxt sıradan çıxacaq?)"
+          placeholder={t("copilotPlaceholder")}
           style={{
             flex: 1, background: "#192026", border: "1px solid #2A333A", borderRadius: 8,
             padding: "8px 12px", color: "#fff", fontSize: 12.5, outline: "none",

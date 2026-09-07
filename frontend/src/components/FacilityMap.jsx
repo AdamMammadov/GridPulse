@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Map, AlertTriangle, CheckCircle2, TrendingUp } from "lucide-react";
 import { api } from "../api";
+import { useLanguage } from "../i18n";
 
+// "zone" açarları backend-dəki neytral (ingiliscə) identifikatorlarla eynidir
+// — yerləşmə/uyğunluq üçün dəyişməz saxlanılır, göstərilən mətn isə ZONE_LABELS-dən gəlir.
 const ZONES = {
   "Berth / Loading Dock": { x: 20, y: 20, w: 760, h: 70, color: "#1E3A4A" },
   "Tank Farm": { x: 20, y: 108, w: 370, h: 100, color: "#243424" },
@@ -13,6 +16,17 @@ const ZONES = {
   "Perimeter": { x: 410, y: 344, w: 370, h: 96, color: "#282828" },
 };
 
+const ZONE_LABELS = {
+  "Berth / Loading Dock": { az: "İskələ / Yükləmə Dokku", en: "Berth / Loading Dock" },
+  "Tank Farm": { az: "Çən Təsərrüfatı", en: "Tank Farm" },
+  "Safety Systems": { az: "Təhlükəsizlik Sistemləri", en: "Safety Systems" },
+  "Pump Station": { az: "Nasos Stansiyası", en: "Pump Station" },
+  "Compression Unit": { az: "Sıxılma Bölməsi", en: "Compression Unit" },
+  "Utilities": { az: "Kommunal Xidmətlər", en: "Utilities" },
+  "Admin Building": { az: "İnzibati Bina", en: "Admin Building" },
+  "Perimeter": { az: "Perimetr", en: "Perimeter" },
+};
+
 const STATUS_COLOR = (d) => {
   if (d.status !== "flagged") return "#2DC653";
   if (d.diagnosis?.cause_id === "unexpected_activation") return "#E85C4A";
@@ -20,6 +34,7 @@ const STATUS_COLOR = (d) => {
 };
 
 export default function FacilityMap() {
+  const { lang, t, pick } = useLanguage();
   const [devices, setDevices] = useState(null);
   const [selected, setSelected] = useState(null);
   const [error, setError] = useState(null);
@@ -55,9 +70,9 @@ export default function FacilityMap() {
 
   return (
     <div className="panel">
-      <p className="section-title"><Map size={16} /> Digital Twin — Obyekt Xəritəsi</p>
+      <p className="section-title"><Map size={16} /> {t("facilityMapTitle")}</p>
       <p style={{ fontSize: 11.5, color: "#6B7580", margin: "-6px 0 14px" }}>
-        Terminalın sxematik planı — hər nöqtə real cihazın yerini və statusunu göstərir. Klikləyin.
+        {t("facilityMapSubtitle")}
       </p>
 
       <svg viewBox="0 0 800 460" style={{ width: "100%", height: "auto", background: "#12171C", borderRadius: 10 }}>
@@ -65,7 +80,7 @@ export default function FacilityMap() {
           <g key={name}>
             <rect x={z.x} y={z.y} width={z.w} height={z.h} rx={8} fill={z.color} stroke="#2A333A" strokeWidth={1} />
             <text x={z.x + 10} y={z.y + 20} fontSize={11} fontWeight={700} fill="#C7D1D9" fontFamily="Segoe UI, sans-serif">
-              {name}
+              {ZONE_LABELS[name]?.[lang] || name}
             </text>
           </g>
         ))}
@@ -91,35 +106,35 @@ export default function FacilityMap() {
       </svg>
 
       <div style={{ display: "flex", gap: 16, marginTop: 10, fontSize: 10.5, color: "#6B7580" }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#2DC653", display: "inline-block" }} />Sağlam</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#F4C542", display: "inline-block" }} />Bayraqlı</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#E85C4A", display: "inline-block" }} />Kritik</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#2DC653", display: "inline-block" }} />{t("legendHealthy")}</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#F4C542", display: "inline-block" }} />{t("legendFlagged")}</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#E85C4A", display: "inline-block" }} />{t("legendCritical")}</span>
       </div>
 
       {selectedDevice && (
         <div style={{ marginTop: 14, background: "#1D242A", border: "1px solid #2A333A", borderRadius: 10, padding: 14 }}>
-          <div style={{ fontSize: 13.5, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{selectedDevice.name}</div>
-          <div style={{ fontSize: 11, color: "#6B7580", marginBottom: 8 }}>{selectedDevice.zone} · rated {selectedDevice.rated_kw} kW</div>
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{pick(selectedDevice, "name")}</div>
+          <div style={{ fontSize: 11, color: "#6B7580", marginBottom: 8 }}>{pick(selectedDevice, "zone")} · {selectedDevice.rated_kw} kW {t("ratedKw")}</div>
 
           {selectedDevice.diagnosis ? (
             <>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                 <AlertTriangle size={14} color={STATUS_COLOR(selectedDevice)} />
                 <span style={{ fontSize: 12.5, fontWeight: 700, color: STATUS_COLOR(selectedDevice) }}>
-                  {selectedDevice.diagnosis.label} ({selectedDevice.diagnosis.confidence_pct}%)
+                  {pick(selectedDevice.diagnosis, "label")} ({selectedDevice.diagnosis.confidence_pct}%)
                 </span>
               </div>
               <p style={{ fontSize: 11.5, color: "#C7D1D9", lineHeight: 1.5, margin: "0 0 6px" }}>
-                {selectedDevice.diagnosis.explanation}
+                {pick(selectedDevice.diagnosis, "explanation")}
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "#2DC653" }}>
                 <TrendingUp size={13} />
-                {selectedDevice.diagnosis.est_savings_azn_per_year.toLocaleString()} AZN/il qənaət mümkündür
+                {t("savingsPossible", selectedDevice.diagnosis.est_savings_azn_per_year)}
               </div>
             </>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#2DC653" }}>
-              <CheckCircle2 size={14} /> Normal işləyir, anomaliya yoxdur.
+              <CheckCircle2 size={14} /> {t("noAnomalyShort")}
             </div>
           )}
         </div>

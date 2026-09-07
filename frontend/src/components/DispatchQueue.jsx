@@ -1,33 +1,33 @@
 import { useEffect, useState } from "react";
 import { Send, User, CheckCircle2, Circle, CircleDot } from "lucide-react";
-import { api } from "../api";
+import { useLanguage } from "../i18n";
 
 const PRIORITY_STYLE = {
-  URGENT: { color: "#E85C4A", bg: "#E85C4A22" },
-  HIGH: { color: "#F0813C", bg: "#F0813C22" },
-  MEDIUM: { color: "#F4C542", bg: "#F4C54222" },
+  URGENT: { color: "#E85C4A", bg: "#E85C4A22", key: "priorityUrgent" },
+  HIGH: { color: "#F0813C", bg: "#F0813C22", key: "priorityHigh" },
+  MEDIUM: { color: "#F4C542", bg: "#F4C54222", key: "priorityMedium" },
 };
 
 const STATUS_FLOW = ["pending", "acknowledged", "resolved"];
-const STATUS_LABEL = {
-  pending: "Gözləyir",
-  acknowledged: "Qəbul edildi",
-  resolved: "Həll edildi",
-};
 
-export default function DispatchQueue() {
+// `fetchFn` prop sayəsində EYNİ komponent həm enerji, həm qaz dispatch
+// növbəsini göstərə bilir (bax GasPage.jsx).
+export default function DispatchQueue({ fetchFn, titleKey = "dispatchTitle" }) {
+  const { t, pick } = useLanguage();
   const [orders, setOrders] = useState(null);
   const [statuses, setStatuses] = useState({});
   const [error, setError] = useState(null);
 
+  const STATUS_LABEL_KEY = { pending: "statusPending", acknowledged: "statusAcknowledged", resolved: "statusResolved" };
+
   useEffect(() => {
-    api.dispatchQueue()
+    fetchFn()
       .then((data) => {
         setOrders(data);
         setStatuses(Object.fromEntries(data.map((o) => [o.ticket_id, "pending"])));
       })
       .catch((e) => setError(e.message));
-  }, []);
+  }, [fetchFn]);
 
   function advanceStatus(ticketId) {
     setStatuses((s) => {
@@ -43,9 +43,9 @@ export default function DispatchQueue() {
 
   return (
     <div className="panel">
-      <p className="section-title"><Send size={16} /> Auto-Dispatch — İş Əmri Növbəsi</p>
+      <p className="section-title"><Send size={16} /> {t(titleKey)}</p>
       <p style={{ fontSize: 11.5, color: "#6B7580", margin: "-6px 0 14px" }}>
-        Kritik/yüksək tapıntılar avtomatik iş əmrinə çevrilir və zona/ixtisasa görə mühəndisə təyin olunur — {orders.length} aktiv əmr.
+        {t("dispatchSubtitle", orders.length)}
       </p>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -64,15 +64,15 @@ export default function DispatchQueue() {
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: "#6B7580" }}>{o.ticket_id}</span>
-                <span className="status-pill" style={{ background: pr.bg, color: pr.color }}>{o.priority}</span>
+                <span className="status-pill" style={{ background: pr.bg, color: pr.color }}>{t(pr.key)}</span>
               </div>
 
-              <div style={{ fontSize: 12.5, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{o.target_name}</div>
-              <div style={{ fontSize: 10.5, color: "#6B7580", marginBottom: 6 }}>{o.zone} · {o.diagnosis_label}</div>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{pick(o, "target_name")}</div>
+              <div style={{ fontSize: 10.5, color: "#6B7580", marginBottom: 6 }}>{pick(o, "zone")} · {pick(o, "diagnosis_label")}</div>
 
               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#C7D1D9", marginBottom: 8 }}>
                 <User size={12} />
-                {o.assigned_engineer} <span style={{ color: "#6B7580" }}>({o.assigned_role})</span>
+                {o.assigned_engineer} <span style={{ color: "#6B7580" }}>({pick(o, "assigned_role")})</span>
               </div>
 
               <button
@@ -88,7 +88,7 @@ export default function DispatchQueue() {
                 }}
               >
                 {resolved ? <CheckCircle2 size={13} /> : st === "acknowledged" ? <CircleDot size={13} /> : <Circle size={13} />}
-                {STATUS_LABEL[st]}{!resolved && " — klikləyin"}
+                {t(STATUS_LABEL_KEY[st])}{!resolved && t("clickToAdvance")}
               </button>
             </div>
           );

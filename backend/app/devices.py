@@ -34,76 +34,117 @@ CRITICAL_THRESHOLDS = {
     "impeller_wear": {"direction": "down", "threshold_frac": 0.35},
 }
 
+# ─── Zona displey adları (neytral "zone" açarı dispatch.py və FacilityMap.jsx
+# üçün dəyişməz saxlanılır — yalnız göstərilən mətn dilə görə dəyişir) ───────
+ZONE_LABELS = {
+    "Pump Station": ("Nasos Stansiyası", "Pump Station"),
+    "Compression Unit": ("Sıxılma Bölməsi", "Compression Unit"),
+    "Utilities": ("Kommunal Xidmətlər", "Utilities"),
+    "Admin Building": ("İnzibati Bina", "Admin Building"),
+    "Tank Farm": ("Çən Təsərrüfatı", "Tank Farm"),
+    "Perimeter": ("Perimetr", "Perimeter"),
+    "Safety Systems": ("Təhlükəsizlik Sistemləri", "Safety Systems"),
+    "Berth / Loading Dock": ("İskələ / Yükləmə Dokku", "Berth / Loading Dock"),
+}
+
 # ─── Device fleet (representative export/processing terminal) ─────────────
+# AZ adlar pitch deck-də istifadə olunan terminologiya ilə uyğunlaşdırılıb.
 DEVICES = [
-    {"id": "D01", "name": "Export Pump A", "category": "pump",
+    {"id": "D01", "name_az": "İxrac Nasosu A", "name_en": "Export Pump A", "category": "pump",
      "zone": "Pump Station", "rated_kw": 450, "duty": "continuous"},
-    {"id": "D02", "name": "Export Pump B (Standby)", "category": "pump",
+    {"id": "D02", "name_az": "İxrac Nasosu B (Ehtiyat)", "name_en": "Export Pump B (Standby)", "category": "pump",
      "zone": "Pump Station", "rated_kw": 450, "duty": "cyclic"},
-    {"id": "D03", "name": "Gas Booster Compressor", "category": "compressor",
+    {"id": "D03", "name_az": "Qaz Booster Kompressoru", "name_en": "Gas Booster Compressor", "category": "compressor",
      "zone": "Compression Unit", "rated_kw": 600, "duty": "continuous"},
-    {"id": "D04", "name": "Cooling Water Circulation Pump", "category": "pump",
+    {"id": "D04", "name_az": "Soyutma Suyu Sirkulyasiya Nasosu", "name_en": "Cooling Water Circulation Pump", "category": "pump",
      "zone": "Utilities", "rated_kw": 120, "duty": "continuous"},
-    {"id": "D05", "name": "Control Room HVAC / Chiller", "category": "hvac",
+    {"id": "D05", "name_az": "Nəzarət Otağı HVAC / Soyuducu", "name_en": "Control Room HVAC / Chiller", "category": "hvac",
      "zone": "Admin Building", "rated_kw": 80, "duty": "cyclic"},
-    {"id": "D06", "name": "Storage Tank Mixer", "category": "motor",
+    {"id": "D06", "name_az": "Anbar Çəni Qarışdırıcısı", "name_en": "Storage Tank Mixer", "category": "motor",
      "zone": "Tank Farm", "rated_kw": 40, "duty": "scheduled"},
-    {"id": "D07", "name": "Yard Perimeter Lighting", "category": "lighting",
+    {"id": "D07", "name_az": "Həyət Perimetr İşıqlandırması", "name_en": "Yard Perimeter Lighting", "category": "lighting",
      "zone": "Perimeter", "rated_kw": 25, "duty": "scheduled"},
-    {"id": "D08", "name": "Fire-Water Pump", "category": "safety_pump",
+    {"id": "D08", "name_az": "Yanğınsöndürmə Nasosu", "name_en": "Fire-Water Pump", "category": "safety_pump",
      "zone": "Safety Systems", "rated_kw": 350, "duty": "standby"},
-    {"id": "D09", "name": "Control Room Servers / UPS", "category": "it_load",
+    {"id": "D09", "name_az": "Nəzarət Otağı Serverləri / UPS", "name_en": "Control Room Servers / UPS", "category": "it_load",
      "zone": "Admin Building", "rated_kw": 15, "duty": "continuous"},
-    {"id": "D10", "name": "Loading Arm Hydraulic Unit", "category": "hydraulic",
+    {"id": "D10", "name_az": "Yükləmə Qolu Hidravlik Sistemi", "name_en": "Loading Arm Hydraulic Unit", "category": "hydraulic",
      "zone": "Berth / Loading Dock", "rated_kw": 55, "duty": "scheduled"},
 ]
 
 # ─── Root-cause library: anomaly signature -> explanation ─────────────────
 ROOT_CAUSES = {
     "bearing_wear": {
-        "label": "Bearing wear / misalignment",
-        "explanation": "Gradual, sustained increase in power draw with no change in output — the classic signature of bearing degradation or shaft misalignment increasing mechanical friction.",
-        "action": "Schedule vibration analysis and bearing inspection within 2 weeks.",
+        "label_az": "Yastıq aşınması / oxlararası yerdəyişmə",
+        "label_en": "Bearing wear / misalignment",
+        "explanation_az": "Çıxışda dəyişiklik olmadan güc istehlakının tədricən, davamlı artması — yastıq korlanmasının və ya val yerdəyişməsinin mexaniki sürtünməni artırmasının klassik əlamətidir.",
+        "explanation_en": "Gradual, sustained increase in power draw with no change in output — the classic signature of bearing degradation or shaft misalignment increasing mechanical friction.",
+        "action_az": "2 həftə ərzində vibrasiya analizi və yastıq yoxlaması planlaşdırın.",
+        "action_en": "Schedule vibration analysis and bearing inspection within 2 weeks.",
     },
     "fouled_filter": {
-        "label": "Fouled filter / increased backpressure",
-        "explanation": "Step increase in power draw to maintain the same throughput — consistent with filter fouling or line restriction forcing the unit to work harder.",
-        "action": "Inspect and replace intake/discharge filters.",
+        "label_az": "Tıxanmış filtr / artmış əks təzyiq",
+        "label_en": "Fouled filter / increased backpressure",
+        "explanation_az": "Eyni məhsuldarlığı saxlamaq üçün güc istehlakında pilləli artım — filtrin tıxanmasına və ya xəttin daralmasının vahidi daha çox işlətməyə məcbur etdiyinə uyğundur.",
+        "explanation_en": "Step increase in power draw to maintain the same throughput — consistent with filter fouling or line restriction forcing the unit to work harder.",
+        "action_az": "Giriş/çıxış filtrlərini yoxlayın və əvəz edin.",
+        "action_en": "Inspect and replace intake/discharge filters.",
     },
     "impeller_wear": {
-        "label": "Impeller wear / cavitation",
-        "explanation": "Gradual decline in effective output at constant power draw — typical of impeller erosion or cavitation reducing pump efficiency over time.",
-        "action": "Inspect impeller and suction conditions at next maintenance window.",
+        "label_az": "Təkər (impeller) aşınması / kavitasiya",
+        "label_en": "Impeller wear / cavitation",
+        "explanation_az": "Sabit güc istehlakında effektiv çıxışın tədricən azalması — təkər eroziyasının və ya kavitasiyanın nasosun səmərəliliyini vaxt keçdikcə azaltmasının tipik əlamətidir.",
+        "explanation_en": "Gradual decline in effective output at constant power draw — typical of impeller erosion or cavitation reducing pump efficiency over time.",
+        "action_az": "Növbəti texniki xidmət zamanı təkəri və sorma şəraitini yoxlayın.",
+        "action_en": "Inspect impeller and suction conditions at next maintenance window.",
     },
     "refrigerant_leak": {
-        "label": "Refrigerant leak / short-cycling",
-        "explanation": "Irregular high-frequency on/off spikes — consistent with a refrigerant leak causing the compressor to short-cycle rather than run efficiently.",
-        "action": "Check refrigerant charge and thermostat calibration.",
+        "label_az": "Soyuducu qaz sızması / tez-tez dövr",
+        "label_en": "Refrigerant leak / short-cycling",
+        "explanation_az": "Nizamsız, yüksək tezlikli aç/söndür pikləri — soyuducu qaz sızmasının kompressoru səmərəli işləmək əvəzinə tez-tez dövr etməyə (short-cycling) məcbur etdiyinə uyğundur.",
+        "explanation_en": "Irregular high-frequency on/off spikes — consistent with a refrigerant leak causing the compressor to short-cycle rather than run efficiently.",
+        "action_az": "Soyuducu qaz doldurulmasını və termostat kalibrasiyasını yoxlayın.",
+        "action_en": "Check refrigerant charge and thermostat calibration.",
     },
     "schedule_fault": {
-        "label": "Control/scheduling fault",
-        "explanation": "Consumption recorded outside the equipment's normal operating window — indicates a timer, sensor, or automation logic fault rather than a mechanical issue.",
-        "action": "Audit control logic / scheduling automation for this unit.",
+        "label_az": "İdarəetmə/cədvəl nasazlığı",
+        "label_en": "Control/scheduling fault",
+        "explanation_az": "İstehlak avadanlığın normal iş pəncərəsindən kənarda qeydə alınıb — mexaniki problemdən çox taymer, sensor və ya avtomatlaşdırma məntiqi nasazlığını göstərir.",
+        "explanation_en": "Consumption recorded outside the equipment's normal operating window — indicates a timer, sensor, or automation logic fault rather than a mechanical issue.",
+        "action_az": "Bu vahid üçün idarəetmə məntiqini / cədvəl avtomatlaşdırmasını audit edin.",
+        "action_en": "Audit control logic / scheduling automation for this unit.",
     },
     "sensor_fault": {
-        "label": "Photocell / timer sensor fault",
-        "explanation": "Equipment running during hours it should be off by design — a failed photocell or timer is the most common cause for lighting circuits.",
-        "action": "Replace photocell/timer sensor.",
+        "label_az": "Fotoxəlihüceyrə / taymer sensor nasazlığı",
+        "label_en": "Photocell / timer sensor fault",
+        "explanation_az": "Avadanlıq dizayn etibarilə söndürülməli olan saatlarda işləyir — işıqlandırma dövrələri üçün ən çox rast gəlinən səbəb nasaz fotoxəlihüceyrə və ya taymerdir.",
+        "explanation_en": "Equipment running during hours it should be off by design — a failed photocell or timer is the most common cause for lighting circuits.",
+        "action_az": "Fotoxəlihüceyrəni/taymer sensorunu əvəz edin.",
+        "action_en": "Replace photocell/timer sensor.",
     },
     "unexpected_activation": {
-        "label": "Unexpected activation — inspect immediately",
-        "explanation": "This unit is designed to remain in standby except for scheduled weekly tests. Sustained unscheduled running suggests an unintended activation, valve fault, or a real system demand — safety-relevant and should not be treated as routine.",
-        "action": "Immediate physical inspection required — verify valve position and system pressure.",
+        "label_az": "Gözlənilməz aktivasiya — dərhal yoxlanılmalıdır",
+        "label_en": "Unexpected activation — inspect immediately",
+        "explanation_az": "Bu vahid planlaşdırılmış həftəlik testlər xaricində standby rejimində qalmalıdır. Davamlı, planlaşdırılmamış işləmə — nəzərdə tutulmayan aktivasiya, klapan nasazlığı, yaxud real sistem tələbatı deməkdir; təhlükəsizliklə bağlıdır və adi hal kimi qəbul edilməməlidir.",
+        "explanation_en": "This unit is designed to remain in standby except for scheduled weekly tests. Sustained unscheduled running suggests an unintended activation, valve fault, or a real system demand — safety-relevant and should not be treated as routine.",
+        "action_az": "Dərhal fiziki yoxlama tələb olunur — klapan vəziyyətini və sistem təzyiqini yoxlayın.",
+        "action_en": "Immediate physical inspection required — verify valve position and system pressure.",
     },
     "battery_degradation": {
-        "label": "UPS battery degradation",
-        "explanation": "Slow upward drift in baseline power with no load change — consistent with aging UPS batteries drawing more float current as they degrade.",
-        "action": "Schedule UPS battery health check / replacement.",
+        "label_az": "UPS batareyasının korlanması",
+        "label_en": "UPS battery degradation",
+        "explanation_az": "Yük dəyişməsi olmadan baza gücündə yavaş yuxarı sürüşmə — köhnəlməkdə olan UPS batareyalarının korlandıqca daha çox float cərəyanı çəkməsinə uyğundur.",
+        "explanation_en": "Slow upward drift in baseline power with no load change — consistent with aging UPS batteries drawing more float current as they degrade.",
+        "action_az": "UPS batareyasının vəziyyət yoxlaması / əvəz edilməsini planlaşdırın.",
+        "action_en": "Schedule UPS battery health check / replacement.",
     },
     "hydraulic_leak": {
-        "label": "Hydraulic leak / valve fault",
-        "explanation": "Power draw recorded outside scheduled loading windows — a hydraulic system holding pressure against a leak will cycle the pump unnecessarily.",
-        "action": "Inspect hydraulic lines and valves for leaks.",
+        "label_az": "Hidravlik sızma / klapan nasazlığı",
+        "label_en": "Hydraulic leak / valve fault",
+        "explanation_az": "Güc istehlakı planlaşdırılmış yükləmə pəncərələrindən kənarda qeydə alınıb — sızmaya qarşı təzyiq saxlayan hidravlik sistem nasosu lazımsız yerə dövr etdirir.",
+        "explanation_en": "Power draw recorded outside scheduled loading windows — a hydraulic system holding pressure against a leak will cycle the pump unnecessarily.",
+        "action_az": "Hidravlik xətləri və klapanları sızma üçün yoxlayın.",
+        "action_en": "Inspect hydraulic lines and valves for leaks.",
     },
 }
 
@@ -203,8 +244,9 @@ def diagnose_devices(raw_df):
         flagged = g[g["is_anomaly"]]
         fault = INJECTED_FAULTS.get(dev["id"])
         status = {
-            "id": dev["id"], "name": dev["name"], "category": dev["category"],
-            "zone": dev["zone"], "rated_kw": dev["rated_kw"],
+            "id": dev["id"], "name_az": dev["name_az"], "name_en": dev["name_en"], "category": dev["category"],
+            "zone": dev["zone"], "zone_az": ZONE_LABELS[dev["zone"]][0], "zone_en": ZONE_LABELS[dev["zone"]][1],
+            "rated_kw": dev["rated_kw"],
             "flagged_days": int(len(flagged)),
             "status": "healthy",
             "diagnosis": None,
@@ -223,9 +265,9 @@ def diagnose_devices(raw_df):
             status["status"] = "flagged"
             status["diagnosis"] = {
                 "cause_id": cause_id,
-                "label": cause["label"],
-                "explanation": cause["explanation"],
-                "recommended_action": cause["action"],
+                "label_az": cause["label_az"], "label_en": cause["label_en"],
+                "explanation_az": cause["explanation_az"], "explanation_en": cause["explanation_en"],
+                "recommended_action_az": cause["action_az"], "recommended_action_en": cause["action_en"],
                 "confidence_pct": confidence,
                 "baseline_kw": round(baseline, 1),
                 "excess_kw_avg": round(excess_kw_avg, 1),
@@ -255,16 +297,19 @@ def diagnose_devices(raw_df):
 
                 if days_to_critical is not None and days_to_critical > 0:
                     trend_pct_per_month = round((rate_per_day * 30 / baseline) * 100, 1)
+                    days_int = int(round(days_to_critical))
                     status["diagnosis"]["predictive"] = {
-                        "days_remaining": int(round(days_to_critical)),
+                        "days_remaining": days_int,
                         "trend_pct_per_month": trend_pct_per_month,
-                        "note": f"Current trend suggests critical wear threshold reached in ~{int(round(days_to_critical))} days if left unaddressed.",
+                        "note_az": f"Cari trend göstərir ki, kritik aşınma həddinə düzəliş edilməzsə ~{days_int} gün ərzində çatılacaq.",
+                        "note_en": f"Current trend suggests critical wear threshold reached in ~{days_int} days if left unaddressed.",
                     }
                 else:
                     status["diagnosis"]["predictive"] = {
                         "days_remaining": 0,
                         "trend_pct_per_month": None,
-                        "note": "Trend has already reached/exceeded the critical threshold — treat as urgent.",
+                        "note_az": "Trend artıq kritik həddə çatıb və ya keçib — təcili hal kimi qəbul edin.",
+                        "note_en": "Trend has already reached/exceeded the critical threshold — treat as urgent.",
                     }
         device_status.append(status)
 

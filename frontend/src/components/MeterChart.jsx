@@ -1,6 +1,7 @@
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Dot,
 } from "recharts";
+import { useLanguage } from "../i18n";
 
 function AnomalyDot(props) {
   const { cx, cy, payload } = props;
@@ -9,6 +10,7 @@ function AnomalyDot(props) {
 }
 
 export default function MeterChart({ history }) {
+  const { t } = useLanguage();
   const data = history.map((h) => ({
     date: h.date.slice(5),
     real: h.consumption_kwh,
@@ -26,8 +28,8 @@ export default function MeterChart({ history }) {
           contentStyle={{ background: "#1d242a", border: "1px solid #2a333a", borderRadius: 8, fontSize: 12 }}
           labelStyle={{ color: "#fff" }}
         />
-        <Line type="monotone" dataKey="expected" stroke="#6b7580" strokeDasharray="4 3" strokeWidth={1.5} dot={false} name="Gözlənilən" />
-        <Line type="monotone" dataKey="real" stroke="#f0813c" strokeWidth={2} dot={<AnomalyDot />} name="Real istehlak" />
+        <Line type="monotone" dataKey="expected" stroke="#6b7580" strokeDasharray="4 3" strokeWidth={1.5} dot={false} name={t("meterChartExpected")} />
+        <Line type="monotone" dataKey="real" stroke="#f0813c" strokeWidth={2} dot={<AnomalyDot />} name={t("meterChartActual")} />
       </LineChart>
     </ResponsiveContainer>
   );

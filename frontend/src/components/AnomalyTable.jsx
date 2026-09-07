@@ -1,22 +1,26 @@
+import { useLanguage } from "../i18n";
+
 const BAND_COLORS = { high: "#e85c4a", mid: "#f4c542" };
 
-function severityLabel(z) {
-  const abs = Math.abs(z);
-  if (abs > 8) return { text: "Yüksək", color: BAND_COLORS.high };
-  return { text: "Orta", color: BAND_COLORS.mid };
-}
-
 export default function AnomalyTable({ anomalies }) {
+  const { t } = useLanguage();
+
+  function severityLabel(z) {
+    const abs = Math.abs(z);
+    if (abs > 8) return { text: t("severityHigh"), color: BAND_COLORS.high };
+    return { text: t("severityMedium"), color: BAND_COLORS.mid };
+  }
+
   return (
     <table>
       <thead>
         <tr>
-          <th>Sayğac</th>
-          <th>Zona</th>
-          <th>Tarix</th>
-          <th>Real (kWh)</th>
-          <th>Gözlənilən (kWh)</th>
-          <th>Şiddət</th>
+          <th>{t("colMeter")}</th>
+          <th>{t("colZone")}</th>
+          <th>{t("colDate")}</th>
+          <th>{t("colActualKwh")}</th>
+          <th>{t("colExpectedKwh")}</th>
+          <th>{t("colSeverity")}</th>
         </tr>
       </thead>
       <tbody>

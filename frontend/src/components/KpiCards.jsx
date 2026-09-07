@@ -1,11 +1,13 @@
 import { Radio, Target, Timer, Flag } from "lucide-react";
+import { useLanguage } from "../i18n";
 
 export default function KpiCards({ summary }) {
+  const { t } = useLanguage();
   const cards = [
-    { label: "İzlənən sayğac", value: summary.meters_monitored, icon: Radio },
-    { label: "Recall", value: `${summary.recall_pct}%`, icon: Target },
-    { label: "Sınaq müddəti", value: `${summary.days_of_data} gün`, icon: Timer },
-    { label: "Bayraqlı hadisə", value: summary.total_flagged_events.toLocaleString(), icon: Flag },
+    { label: t("kpiMeters"), value: summary.meters_monitored, icon: Radio },
+    { label: t("kpiRecall"), value: `${summary.recall_pct}%`, icon: Target },
+    { label: t("kpiTestDuration"), value: `${summary.days_of_data} ${t("daysSuffix")}`, icon: Timer },
+    { label: t("kpiFlaggedEvents"), value: summary.total_flagged_events.toLocaleString(), icon: Flag },
   ];
   return (
     <div className="kpi-grid">
