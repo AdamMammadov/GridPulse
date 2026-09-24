@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "https://gridpulse-backend-production.up.railway.app";
 
 async function get(path) {
   const res = await fetch(`${BASE_URL}${path}`);
